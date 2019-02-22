@@ -1,0 +1,35 @@
+FROM ibmcom/powerai:1.5.3-all-ubuntu16.04-py3
+MAINTAINER Duy Nguyen <dnguyenv@us.ibm.com>
+ENV     LICENSE=yes\
+        ACTIVATE=tensorflow
+ENV PATH="/home/pwrai/anaconda3/bin:/usr/local/nvidia/bin:/usr/local/cuda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+#ADD ./cudnn-9.2-linux-ppc64le-v7.2.1.38.tgz /tmp/cudnn-9.2-linux-ppc64le-v7.2.1.38.tgz
+
+RUN sudo apt update && sudo apt-get update \
+    && sudo apt-get install -y python3-pip python3-dev libhdf5-dev python3-tk vim \    
+    && sudo ln -s /usr/bin/python3 /usr/local/bin/python \
+    && echo "1" | sudo /opt/DL/license/bin/accept-powerai-license.sh \
+    && sudo ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/libcuda.so.1 \
+    && conda install -y prometheus_client \
+    && conda install -y requests
+
+ADD . /code
+
+#RUN sudo tar -C /usr/local --no-same-owner -xzvf /code/cudnn-9.2-linux-ppc64le-v7.2.1.38.tgz \
+#    && sudo DEBIAN_FRONTEND=noninteractive apt-get install -yq nvidia-396; exit(0)
+
+WORKDIR /code
+
+
+#===These changes are needed to work with TensorFlow 1.10.0 on POWER===#
+RUN sed -e '/1.4.0/d' /code/object_detection_api.py > /tmp/tmp.py \
+    && sudo mv /tmp/tmp.py /code/object_detection_api.py
+RUN sudo sed -i 's/with tf.Session(graph=detection_graph) as sess:/  sess = tf.Session(graph=detection_graph)/g' /code/object_detection_api.py \
+    && sudo sed -i 's/item.numObjects = obj_above_thresh/item.numObjects = int(obj_above_thresh)/g' /code/object_detection_api.py \
+    && sudo sed -i 's/item.threshold = threshold/item.threshold = int(threshold)/g' /code/object_detection_api.py
+#===These changes are needed to work with TensorFlow 1.10.0 on POWER===#
+
+EXPOSE 5000
+
+ENTRYPOINT ["/bin/bash","-c", "source /opt/DL/tensorflow/bin/tensorflow-activate && python /code/server.py"]

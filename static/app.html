@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Verizon-IBM Object Detection Demo</title>
+    <link rel="stylesheet" href="static/video.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--script src="static/adapter-latest.js"></script-->
+</head>
+
+<body>
+    <video id="myVideo" autoplay loop muted playsinline></video>
+    <button class="phoneAccess" id="phoneAccess" onclick="allowCameraAccess()">Start Camera Access</button>
+
+    <!--Adding layout for capturing objects-->
+
+    <button class="toggleObjectDetails" id="openObjectDetails" onclick="openObjectDetails()">iii</button>
+
+    <div id="objects">
+        <br>
+        <button class="toggleObjectDetails" onclick="closeObjectDetails()">X</button>
+        <br><br>
+        <div id="objectList">
+        </div>
+
+    </div>
+
+    <div id="latency">
+
+    </div>
+
+    <div id="ptime"></div>
+
+    <script src="static/app.js"></script>
+    <script id="objectDetect" src="static/objectDetect.js" data-source="myVideo" data-mirror="true" data-uploadWidth="1280" data-scoreThreshold="0.40"></script>
+    <script src="static/mobile-detect.min.js"></script>
+    <script>
+        (function() {
+            function detectMobile() {
+                var ua = window.navigator.userAgent;
+                var md = new MobileDetect(ua);
+                if (md.mobile()) {
+                    md.device = {
+                        'isMobile': true
+                    };
+                    md.device['os'] = md.os();
+                    md.device['iPhone'] = md.is('iPhone');
+                    md.device['iPad'] = md.is('iPad');
+                    md.device['iPod'] = md.is('iPod');
+                    md.device['iPod'] = md.is('iPod');
+                    md.device['Android'] = md.is('AndroidOS');
+                    md.device['iOS'] = md.is('iOS');
+                    md.device['isPhone'] = md.phone();
+                    md.device['isTablet'] = md.tablet();
+                } else {
+                    md.device = null;
+                }
+                console.log('Detected Info', md);
+                window.md = md;
+                return md;
+            };
+
+            function updateVideoScreen() {
+                var w = window.innerWidth;
+                var h = window.innerHeight;
+                console.log('window w & h', w, h);
+                if (screen && screen.width) {
+                    if (w > screen.width || h > screen.height) {
+                        w = screen.width;
+                        h = screen.height;
+                        console.log('screen o, w & h', window.orientation, w, h);
+                    }
+                }
+                if (!drawCanvas) {
+                    drawCanvas = document.getElementsById('drawCanvas');
+                }
+                if (!statusCanvas) {
+                    statusCanvas = document.getElementsById('statusCanvas');
+                }
+                if (drawCanvas) {
+                    drawCanvas.width = w;
+                    drawCanvas.height = h;
+                }
+                if (statusCanvas) {
+                    statusCanvas.width = w;
+                    statusCanvas.height = h;
+                }
+            };
+
+            function mobileCameraHandler() {
+                window.allowCameraAccess = () => {
+                    if (document.getElementById('myVideo').style.display == '' ||
+                        document.getElementById('myVideo').style.display == 'none') {
+                        document.getElementById('myVideo').style.display = 'block';
+                        document.getElementById('phoneAccess').innerText = 'Stop Camera Access';
+                    } else {
+                        document.getElementById('myVideo').style.display = 'none';
+                        document.getElementById('phoneAccess').innerText = 'Start Camera Access';
+                    }
+                }
+                window.addEventListener("orientationchange", updateVideoScreen);
+            };
+
+            function cameraHandler() {
+                window.allowCameraAccess = () => {
+                    document.getElementById('phoneAccess').style.display = 'none';
+                    document.getElementById('myVideo').style.display = 'block';
+                }
+                window.allowCameraAccess();
+                window.addEventListener("resize", updateVideoScreen);
+            };
+
+            function objectDetail() {
+                // Toggle Object details
+                window.closeObjectDetails = () => {
+                    document.getElementById('objects').style.display = 'none';
+                    document.getElementById('openObjectDetails').style.display = 'block';
+                }
+
+                window.openObjectDetails = () => {
+                    document.getElementById('objects').style.display = 'block';
+                    document.getElementById('openObjectDetails').style.display = 'none';
+                    //document.getElementById('closeObjectDetails').style.display = 'block';
+                }
+            };
+            // on init
+            var md = detectMobile();
+            if (md.device) {
+                mobileCameraHandler();
+            } else {
+                cameraHandler();
+            }
+            objectDetail();
+            window.addEventListener("DOMContentLoaded", updateVideoScreen);
+            window.addEventListener("load", function() {
+                setTimeout(updateVideoScreen, 6000);
+            });
+        })();
+    </script>
+
+</body>
+
+</html>
