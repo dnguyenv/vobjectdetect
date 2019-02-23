@@ -1,11 +1,10 @@
 const s = document.getElementById('objectDetect');
-const sourceVideo = s.getAttribute("data-source"); //the source video to use
+const sourceVideo = s.getAttribute("data-source");
 const uploadWidth = s.getAttribute("data-uploadWidth") || 640; //the width of the upload file
-const mirror = s.getAttribute("data-mirror") || false; //mirror the boundary boxes
+const mirror = s.getAttribute("data-mirror") || false;
 const scoreThreshold = s.getAttribute("data-scoreThreshold") || 0.5;
 let pathName = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
-const apiServer = s.getAttribute("data-apiServer") || window.location.origin + pathName + '/image'; //the full TensorFlow Object Detection API server url
-const influxServer = window.location.origin + pathName + '/influx'
+const apiServer = s.getAttribute("data-apiServer") || window.location.origin + pathName + '/image'; //TensorFlow Object Detection API server
 
 //Video element selector
 v = document.getElementById(sourceVideo);
@@ -130,14 +129,13 @@ function drawBoxes(objects, lat) {
 
             lat = Math.round(lat * 10) / 10;
             let latency = document.getElementById("latency");
-            latency.innerHTML = `<div class="objectTitle">latency - <span>${lat}</span><span>ms<span></div>`;
+            latency.innerHTML = `<div class="objectTitle">Latency - <span>${lat}</span><span>ms<span></div>`;
 
         }
         lat = Math.round(lat * 10) / 10;
         lat = Math.round((lat - latc));
         let latency = document.getElementById("latency");
-        latency.innerHTML = `<div class="objectTitle">latency - <span>${lat}</span><span>ms<span></div>`;#
-
+        latency.innerHTML = `<div class="objectTitle">Latency - <span>${lat}</span><span>ms<span></div>`;
     });
 }
 
@@ -160,7 +158,10 @@ function postFile(file) {
             if (objects && objects.length > 0 && objects[objects.length - 1].detection_time >= 0) {
                 statusObj = objects.pop();
             }
-            statusObj = Object.assign({ 'resp_time': ((new Date().getTime() / 1000) - sTime), 'detection_time': 0 }, statusObj);
+            statusObj = Object.assign({
+                'resp_time': ((new Date().getTime() / 1000) - sTime),
+                'detection_time': 0
+            }, statusObj);
             drawStatus(statusObj);
 
             //draw the boxes
@@ -222,4 +223,3 @@ v.onplaying = () => {
         startObjectDetection();
     }
 };
-3

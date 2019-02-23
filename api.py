@@ -5,7 +5,7 @@ import tensorflow as tf
 import json
 import numpy as np
 import requests
-import server
+import app
 import time
 
 
@@ -17,7 +17,7 @@ import time
 
 # Object detection imports
 from object_detection.utils import label_map_util    ### CWH: Add object_detection path
-test_ip = server.metrics
+#test_ip = server.metrics
 # Model Preparation
 
 # What model to download.
@@ -86,7 +86,7 @@ with detection_graph.as_default():
 # added to put object in JSON
 class Object(object):
     def __init__(self):
-        self.name="webrtcHacks TensorFlow Object Detection REST API"
+        self.name="TensorFlow Object Detection REST API"
 
     def toJSON(self):
         return json.dumps(self.__dict__)
