@@ -61,8 +61,10 @@ def image():
         return e
 
 if __name__ == '__main__':
-	# without SSL
-    app.run(port=5000, host='0.0.0.0', ssl_context='adhoc')
+	# without SSL, for running in k8s
+    app.run(port=5000, host='0.0.0.0')#, ssl_context='adhoc')
+    # This is for running locally
+    #app.run(port=5000, host='0.0.0.0', ssl_context='adhoc')
 
 	# with SSL
     #app.run(debug=True, host='0.0.0.0', ssl_context=('ssl/server.crt', 'ssl/server.key'))
